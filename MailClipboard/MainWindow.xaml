@@ -5,8 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MailClipboard"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="350" Width="525" Loaded="MainWindow_OnLoaded" Closing="MainWindow_OnClosing">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Label Content="Target Email:"/>
+        <Label Content="Source Email Username:" Grid.Row="1" />
+        <Label Content="Source Email Password:" Grid.Row="2" />
+        <DockPanel Grid.Row="3" LastChildFill="True">
+            <Label Content="Hotkey:"/>
+            <TextBox ></TextBox>
+        </DockPanel>
+        <Button Grid.Row="4">Save Source Email(Gmail only)</Button>
     </Grid>
 </Window>
