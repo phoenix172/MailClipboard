@@ -5,25 +5,47 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MailClipboard"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525" Loaded="MainWindow_OnLoaded" Closing="MainWindow_OnClosing">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-        </Grid.RowDefinitions>
-        <Label Content="Target Email:"/>
-        <Label Content="Source Email Username:" Grid.Row="1" />
-        <Label Content="Source Email Password:" Grid.Row="2" />
-        <DockPanel Grid.Row="3" LastChildFill="True">
-            <Label Content="Hotkey:"/>
-            <TextBox ></TextBox>
+        Title="MainWindow" Height="350" Width="525" Closing="MainWindow_OnClosing"
+        StateChanged="OnStateChanged" IsVisibleChanged="OnIsVisibleChanged">
+    <Grid >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0" DataContext="{Binding Config}">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Label Content="Sender Name:" Grid.Row="1" Grid.Column="0"/>
+            <Label Content="Sender Email:" Grid.Row="2" Grid.Column="0" />
+            <Label Content="Recipient Name:" Grid.Row="3" Grid.Column="0" />
+            <Label Content="Recipient Email:" Grid.Row="4" Grid.Column="0" />
+            <Label Content="Email Body:" Grid.Row="5" Grid.Column="0" />
+            <Label Content="Hotkey:" Grid.Row="6" Grid.Column="0" />
+
+            <Label Content="{Binding SenderName}" Grid.Row="1" Grid.Column="1"/>
+            <Label Content="{Binding SenderEmail}" Grid.Row="2" Grid.Column="1"/>
+            <Label Content="{Binding RecipientName}" Grid.Row="3" Grid.Column="1"/>
+            <Label Content="{Binding RecipientEmail}" Grid.Row="4" Grid.Column="1"/>
+            <Label Content="{Binding EmailBody}" Grid.Row="5" Grid.Column="1"/>
+            <Label Content="{Binding Hotkey}" Grid.Row="6" Grid.Column="1"/>
+
+            <Button Click="ChangePassword" Grid.Row="7" Grid.ColumnSpan="2" Margin="10" >Change password</Button>
+        </Grid >
+        <DockPanel Grid.Column="1" LastChildFill="True">
+            <Label DockPanel.Dock="Top" HorizontalAlignment="Center" FontWeight="Bold">Sent messages</Label>
+            <ListBox ItemsSource="{Binding LogMessages}" Name="LogDisplay" DockPanel.Dock="Top"/>
         </DockPanel>
-        <Button Grid.Row="4">Save Source Email(Gmail only)</Button>
     </Grid>
 </Window>
