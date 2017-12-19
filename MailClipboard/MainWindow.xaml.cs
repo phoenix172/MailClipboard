@@ -9,6 +9,10 @@ using System.Net.Mail;
 using System.Reflection;
 using System.Security;
 using System.Windows;
+using System.Windows.Forms;
+using Hardcodet.Wpf.TaskbarNotification;
+using Clipboard = System.Windows.Clipboard;
+using MessageBox = System.Windows.MessageBox;
 
 namespace MailClipboard
 {
@@ -17,16 +21,12 @@ namespace MailClipboard
     /// </summary>
     public partial class MainWindow : Window
     {
-        private System.Windows.Forms.NotifyIcon _trayIcon;
         private WindowState _currentWindowState = WindowState.Normal;
         private readonly HotkeyManager _hotkeyManager;
         private readonly MailSender _sender;
 
-
         public MainWindow()
         {
-            InitializeTray();
-
             LogMessages = new ObservableCollection<string>();
 
             Config = AppConfiguration.Load();
@@ -43,19 +43,6 @@ namespace MailClipboard
         public ObservableCollection<string> LogMessages { get; }
         public AppConfiguration Config { get; }
 
-        private void InitializeTray()
-        {
-            _trayIcon = new System.Windows.Forms.NotifyIcon
-            {
-                BalloonTipText = "The app has been minimised. Click the tray icon to show.",
-                BalloonTipTitle = "MailClipboard",
-                Text = "MailClipboard",
-                Icon = new Icon(
-                    Assembly.GetExecutingAssembly().GetManifestResourceStream("MailClipboard.Resources.AppIcon.ico"))
-            };
-            _trayIcon.Click += TrayIcon_Click;
-        }
-
         private void SendEmail()
         {
             HandleException(() =>
@@ -63,6 +50,7 @@ namespace MailClipboard
                 string emailText = Clipboard.GetText();
                 _sender.SendEmail(emailText);
                 LogMessages.Add(emailText);
+                TrayIcon.ShowBalloonTip("Email sent", emailText, BalloonIcon.Info);
             });
         }
 
@@ -103,40 +91,24 @@ namespace MailClipboard
         private void MainWindow_OnClosing(object sender, CancelEventArgs e)
         {
             _hotkeyManager.Dispose();
-            _trayIcon.Dispose();
-            _trayIcon = null;
-        }
-        
-        private void OnStateChanged(object sender, EventArgs args)
-        {
-            if (WindowState == WindowState.Minimized)
-            {
-                Hide();
-                if (_trayIcon != null)
-                    _trayIcon.ShowBalloonTip(2000);
-            }
-            else
-                _currentWindowState = WindowState;
-        }
-        private void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs args)
-        {
-            CheckTrayIcon();
         }
 
-        private void TrayIcon_Click(object sender, EventArgs e)
+        private void TaskbarIcon_OnTrayClick(object sender, RoutedEventArgs e)
         {
             Show();
             WindowState = _currentWindowState;
         }
-        private void CheckTrayIcon()
-        {
-            ShowTrayIcon(!IsVisible);
-        }
 
-        private void ShowTrayIcon(bool show)
+        private void MainWindow_OnStateChanged(object sender, EventArgs e)
         {
-            if (_trayIcon != null)
-                _trayIcon.Visible = show;
+            if (WindowState == WindowState.Minimized)
+            {
+                Hide();
+            }
+            else
+            {
+                _currentWindowState = WindowState;
+            }
         }
     }
 }
