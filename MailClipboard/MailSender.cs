@@ -19,7 +19,9 @@ namespace MailClipboard
             Password = password;
         }
 
-        public void SendEmail(string selectedText)
+        public SecureString Password { get; set; }
+
+        public async Task SendAsync(string selectedText)
         {
             var fromAddress = new MailAddress(_config.SenderEmail, _config.SenderName);
             var toAddress = new MailAddress(_config.RecipientEmail, _config.RecipientName);
@@ -41,10 +43,8 @@ namespace MailClipboard
                 Body = _config.EmailBody
             })
             {
-                smtp.Send(message);
+                await smtp.SendMailAsync(message);
             }
         }
-
-        public SecureString Password { get; set; }
     }
 }

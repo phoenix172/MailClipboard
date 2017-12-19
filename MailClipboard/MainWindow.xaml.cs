@@ -8,6 +8,8 @@ using System.Net;
 using System.Net.Mail;
 using System.Reflection;
 using System.Security;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using Hardcodet.Wpf.TaskbarNotification;
@@ -48,10 +50,28 @@ namespace MailClipboard
             HandleException(() =>
             {
                 string emailText = Clipboard.GetText();
-                _sender.SendEmail(emailText);
-                LogMessages.Add(emailText);
-                TrayIcon.ShowBalloonTip("Email sent", emailText, BalloonIcon.Info);
+                LogEmail(emailText);
+                _sender.SendAsync(emailText)
+                .ContinueWith(
+                    (t, state) => LogError(t.Exception?.GetBaseException()),
+                    null, CancellationToken.None,
+                    TaskContinuationOptions.NotOnRanToCompletion,
+                    TaskScheduler.FromCurrentSynchronizationContext());
             });
+        }
+
+        private void LogError(Exception ex)
+        {
+            TrayIcon.HideBalloonTip();
+            TrayIcon.ShowBalloonTip("Send error", "Unable to send email", BalloonIcon.Error);
+            LogMessages.Add($"Error: {ex?.Message}");
+        }
+
+        private void LogEmail(string emailText)
+        {
+            TrayIcon.HideBalloonTip();
+            TrayIcon.ShowBalloonTip("Sending email", emailText, BalloonIcon.Info);
+            LogMessages.Add($"Sending: {emailText}");
         }
 
         private void ChangePassword(object sender, RoutedEventArgs e)
@@ -64,7 +84,7 @@ namespace MailClipboard
             HandleException(() => AuthenticationHelper.GetPassword(Config.SenderEmail));
 
         private void ForgetPassword() =>
-            HandleException(()=>AuthenticationHelper.ForgetPassword(Config.SenderEmail));
+            HandleException(() => AuthenticationHelper.ForgetPassword(Config.SenderEmail));
 
         private T HandleException<T>(Func<T> action)
         {
@@ -92,13 +112,11 @@ namespace MailClipboard
         {
             _hotkeyManager.Dispose();
         }
-
         private void TaskbarIcon_OnTrayClick(object sender, RoutedEventArgs e)
         {
             Show();
             WindowState = _currentWindowState;
         }
-
         private void MainWindow_OnStateChanged(object sender, EventArgs e)
         {
             if (WindowState == WindowState.Minimized)
